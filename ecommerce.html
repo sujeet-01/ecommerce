@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oak &amp; Earth — Curated Homeware</title>
+  <meta name="description" content="A curated collection of homeware, textiles and objects for the considered home." />
+  <!-- React + Babel from CDN — no install needed -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --cream:#F5F0E8;--warm:#FAF8F4;--ink:#1A1612;--ink2:#4A3F35;--ink3:#8A7F75;
+      --terra:#C4622D;--terra2:#9E4A1E;--sage:#7A8C6E;--gold:#C9A84C;
+      --border:#D8D0C4;--border2:#EAE4DC;
+      --serif:'Cormorant Garamond',Georgia,serif;
+      --mono:'DM Mono',monospace;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:var(--serif);background:var(--warm);color:var(--ink);min-height:100vh}
+    #root{min-height:100vh;display:flex;flex-direction:column}
+    .app{min-height:100vh;display:flex;flex-direction:column}
+    /* NAV */
+    .nav{background:var(--ink);color:var(--cream);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(255,255,255,.06)}
+    .nav-logo{font-family:var(--serif);font-size:1.4rem;font-weight:300;letter-spacing:.18em;cursor:pointer;color:var(--cream);user-select:none}
+    .nav-logo em{color:var(--terra);font-style:normal}
+    .nav-links{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap}
+    .nb{background:none;border:none;color:var(--cream);font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:.45rem .8rem;transition:all .2s;opacity:.65;white-space:nowrap}
+    .nb:hover{opacity:1;background:rgba(255,255,255,.08)}
+    .nb.on{opacity:1;color:var(--gold)}
+    .nb.cart{background:var(--terra);opacity:1;padding:.45rem 1rem;position:relative}
+    .nb.cart:hover{background:var(--terra2)}
+    .badge{position:absolute;top:1px;right:1px;background:var(--gold);color:var(--ink);border-radius:50%;width:15px;height:15px;font-size:.55rem;display:flex;align-items:center;justify-content:center;font-weight:700}
+    /* LAYOUT */
+    .page{flex:1;max-width:1200px;margin:0 auto;width:100%;padding:2rem}
+    .wide{flex:1;padding:2rem}
+    .sec-hd{display:flex;align-items:baseline;gap:.9rem;margin-bottom:2rem;padding-bottom:.85rem;border-bottom:1px solid var(--border)}
+    .sec-t{font-family:var(--serif);font-size:1.9rem;font-weight:300;font-style:italic}
+    .sec-c{font-family:var(--mono);font-size:.62rem;color:var(--ink3);letter-spacing:.1em}
+    /* HERO */
+    .hero{background:var(--ink);color:var(--cream);padding:4.5rem 2rem 4rem;text-align:center;position:relative;overflow:hidden}
+    .hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 110%,rgba(196,98,45,.18),transparent);pointer-events:none}
+    .hero-eye{font-family:var(--mono);font-size:.6rem;letter-spacing:.35em;text-transform:uppercase;color:var(--terra);margin-bottom:1.25rem}
+    .hero-h{font-family:var(--serif);font-size:clamp(2.2rem,5.5vw,4.5rem);font-weight:300;line-height:1.05;font-style:italic;margin-bottom:1.25rem}
+    .hero-sub{font-size:1rem;color:rgba(245,240,232,.6);font-weight:300;max-width:400px;margin:0 auto 2.5rem;line-height:1.75}
+    .hero-cta{display:inline-block;background:var(--terra);color:#fff;font-family:var(--mono);font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;padding:.8rem 2rem;border:none;cursor:pointer;transition:background .2s}
+    .hero-cta:hover{background:var(--terra2)}
+    .hero-strip{display:flex;justify-content:center;gap:3rem;padding:1.5rem 2rem;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06)}
+    .hero-stat-n{font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--cream)}
+    .hero-stat-l{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink3)}
+    /* SEARCH */
+    .search-wrap{position:relative;flex:1}
+    .search-input{width:100%;padding:.7rem 1rem .7rem 2.5rem;border:1px solid var(--border);background:white;font-family:var(--serif);font-size:.95rem;color:var(--ink);outline:none;transition:border-color .2s}
+    .search-input:focus{border-color:var(--terra)}
+    .search-icon{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:.9rem;pointer-events:none}
+    /* FILTERS */
+    .filters{display:flex;gap:.45rem;margin-bottom:1.75rem;flex-wrap:wrap}
+    .fb{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.35rem .85rem;border:1px solid var(--border);background:none;cursor:pointer;color:var(--ink2);transition:all .2s}
+    .fb:hover,.fb.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+    .sort-sel{font-family:var(--mono);font-size:.65rem;padding:.35rem .6rem;border:1px solid var(--border);background:white;cursor:pointer;color:var(--ink);outline:none}
+    /* PRODUCT GRID */
+    .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.5px;background:var(--border);border:1px solid var(--border)}
+    .pcard{background:var(--warm);padding:1.6rem;cursor:pointer;transition:background .18s;position:relative;overflow:hidden}
+    .pcard:hover{background:var(--cream)}
+    .pcard:hover .pcta{opacity:1;transform:translateY(0)}
+    .pcard:hover .pwish{opacity:1}
+    .pemoji{font-size:2.3rem;margin-bottom:.9rem;display:block}
+    .pcat{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--sage);margin-bottom:.35rem}
+    .pname{font-size:1.05rem;font-weight:400;margin-bottom:.35rem;line-height:1.3}
+    .pdesc{font-size:.82rem;color:var(--ink2);line-height:1.65;margin-bottom:.9rem;font-style:italic}
+    .pfoot{display:flex;align-items:center;justify-content:space-between}
+    .pprice{font-family:var(--mono);font-size:.88rem}
+    .pstock{font-family:var(--mono);font-size:.58rem;color:var(--sage)}
+    .pstock.low{color:#c62828}
+    .pcta{background:var(--terra);color:#fff;border:none;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.5rem .9rem;cursor:pointer;opacity:0;transform:translateY(4px);transition:all .2s}
+    .pcta:hover{background:var(--terra2)}
+    .pwish{position:absolute;top:.9rem;right:.9rem;background:none;border:none;font-size:1.1rem;cursor:pointer;opacity:0;transition:opacity .2s;padding:.2rem;line-height:1}
+    .pwish.saved{opacity:1}
+    .feat-badge{position:absolute;top:.75rem;left:.75rem;background:var(--gold);color:var(--ink);font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .5rem}
+    /* PRODUCT MODAL */
+    .pmod-ov{position:fixed;inset:0;background:rgba(26,22,18,.72);z-index:300;display:flex;align-items:center;justify-content:center;padding:1rem}
+    .pmod{background:white;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;position:relative;animation:fadeUp .25s ease}
+    .pmod-img{background:var(--cream);padding:2.5rem;text-align:center;font-size:5rem;border-bottom:1px solid var(--border2)}
+    .pmod-body{padding:2rem}
+    .pmod-cat{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);margin-bottom:.5rem}
+    .pmod-name{font-family:var(--serif);font-size:1.9rem;font-weight:300;font-style:italic;margin-bottom:.75rem;line-height:1.2}
+    .pmod-desc{font-size:.95rem;color:var(--ink2);line-height:1.75;margin-bottom:1.5rem}
+    .pmod-price{font-family:var(--mono);font-size:1.4rem;margin-bottom:.4rem}
+    .pmod-stock{font-family:var(--mono);font-size:.65rem;color:var(--sage);margin-bottom:1.5rem}
+    .pmod-acts{display:flex;gap:.75rem}
+    .pmod-add{flex:1;background:var(--ink);color:var(--cream);border:none;font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;padding:.9rem;cursor:pointer;transition:background .2s}
+    .pmod-add:hover{background:var(--terra)}
+    .pmod-wish{background:none;border:1px solid var(--border);padding:.9rem 1.1rem;cursor:pointer;font-size:1.1rem;transition:all .2s}
+    .pmod-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--ink3);line-height:1;padding:.25rem;z-index:1}
+    /* CART */
+    .cart-empty{text-align:center;padding:5rem 2rem;color:var(--ink2)}
+    .citem{display:grid;grid-template-columns:3rem 1fr auto auto;gap:1rem;align-items:center;padding:1.1rem 0;border-bottom:1px solid var(--border2)}
+    .citem-emoji{font-size:1.7rem;text-align:center}
+    .citem-name{font-size:.98rem;margin-bottom:.18rem}
+    .citem-price{font-family:var(--mono);font-size:.75rem;color:var(--ink2)}
+    .qty-ctrl{display:flex;align-items:center;gap:.45rem}
+    .qb{background:var(--cream);border:1px solid var(--border);width:26px;height:26px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+    .qb:hover{background:var(--ink);color:var(--cream)}
+    .qv{font-family:var(--mono);font-size:.78rem;min-width:18px;text-align:center}
+    .rmv{background:none;border:none;color:var(--border);cursor:pointer;font-size:1rem;padding:.25rem;transition:color .15s}
+    .rmv:hover{color:var(--terra)}
+    .cart-sum{margin-top:1.75rem;padding:1.4rem;background:var(--cream);border:1px solid var(--border)}
+    .srow{display:flex;justify-content:space-between;margin-bottom:.65rem;font-family:var(--mono);font-size:.78rem;color:var(--ink2)}
+    .srow.tot{font-size:.95rem;color:var(--ink);padding-top:.75rem;border-top:1px solid var(--border);margin-top:.75rem;margin-bottom:0}
+    .free-ship{font-family:var(--mono);font-size:.6rem;color:var(--sage);margin-bottom:.5rem}
+    .checkout-btn{width:100%;margin-top:1.25rem;background:var(--ink);color:var(--cream);border:none;font-family:var(--mono);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;padding:.95rem;cursor:pointer;transition:background .2s}
+    .checkout-btn:hover{background:var(--terra)}
+    /* CHECKOUT */
+    .co-grid{display:grid;grid-template-columns:1fr 300px;gap:2rem;align-items:start}
+    .form-t{font-family:var(--serif);font-size:1.15rem;font-style:italic;font-weight:300;margin-bottom:1.25rem;padding-bottom:.65rem;border-bottom:1px solid var(--border2)}
+    .lbl{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);display:block;margin-bottom:.35rem}
+    .inp{width:100%;padding:.7rem .9rem;border:1px solid var(--border);background:white;font-family:var(--serif);font-size:.93rem;color:var(--ink);transition:border-color .2s;outline:none}
+    .inp:focus{border-color:var(--terra)}
+    .inp-row{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+    .place-btn{width:100%;background:var(--terra);color:white;border:none;font-family:var(--mono);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;padding:.95rem;cursor:pointer;margin-top:1.4rem;transition:background .2s}
+    .place-btn:hover{background:var(--terra2)}
+    .co-aside{background:var(--cream);border:1px solid var(--border);padding:1.4rem;position:sticky;top:80px}
+    .co-aside-t{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin-bottom:1rem}
+    /* ORDERS */
+    .ocard{border:1px solid var(--border);margin-bottom:.85rem;overflow:hidden}
+    .ohd{display:flex;justify-content:space-between;align-items:center;padding:.95rem 1.2rem;background:var(--cream);cursor:pointer;transition:background .15s}
+    .ohd:hover{background:#ede7da}
+    .oid{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;font-weight:500}
+    .odate{font-family:var(--mono);font-size:.62rem;color:var(--ink2)}
+    .obody{padding:1.2rem;border-top:1px solid var(--border2)}
+    .oitem-row{display:flex;justify-content:space-between;padding:.3rem 0;font-size:.88rem;font-style:italic;border-bottom:1px dotted var(--border2)}
+    .otot{display:flex;justify-content:space-between;padding-top:.7rem;font-family:var(--mono);font-size:.8rem}
+    /* ORDER TIMELINE */
+    .timeline{display:flex;margin-top:1.2rem;position:relative}
+    .tl-step{flex:1;text-align:center;position:relative}
+    .tl-step::before{content:'';position:absolute;top:11px;left:50%;width:100%;height:2px;background:var(--border2)}
+    .tl-step:last-child::before{display:none}
+    .tl-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);background:white;margin:0 auto .4rem;display:flex;align-items:center;justify-content:center;font-size:.6rem;position:relative;z-index:1}
+    .tl-dot.done{background:var(--sage);border-color:var(--sage);color:white}
+    .tl-dot.active{background:var(--terra);border-color:var(--terra);color:white}
+    .tl-lbl{font-family:var(--mono);font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+    .tl-lbl.done{color:var(--sage)}
+    .tl-lbl.active{color:var(--terra);font-weight:500}
+    /* STATUS BADGE */
+    .sbadge{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;padding:.22rem .6rem;border-radius:2px}
+    .s-delivered{background:#E8F5E9;color:#2E7D32}
+    .s-shipped{background:#E3F2FD;color:#1565C0}
+    .s-processing{background:#FFF8E1;color:#F57F17}
+    .s-pending{background:#F3E5F5;color:#6A1B9A}
+    .s-cancelled{background:#FFEBEE;color:#B71C1C}
+    /* AUTH */
+    .auth-wrap{max-width:420px;margin:3.5rem auto;padding:2.25rem;background:white;border:1px solid var(--border)}
+    .auth-t{font-family:var(--serif);font-size:1.75rem;font-style:italic;font-weight:300;margin-bottom:.4rem;text-align:center}
+    .auth-st{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);text-align:center;margin-bottom:1.75rem}
+    .auth-btn{width:100%;background:var(--ink);color:var(--cream);border:none;font-family:var(--mono);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;padding:.88rem;cursor:pointer;margin-top:1.1rem;transition:background .2s}
+    .auth-btn:hover{background:var(--terra)}
+    .auth-sw{text-align:center;margin-top:1.1rem;font-size:.88rem;color:var(--ink2)}
+    .auth-sw button{background:none;border:none;color:var(--terra);cursor:pointer;font-family:var(--serif);font-size:.88rem;text-decoration:underline}
+    .auth-hint{background:var(--cream);border:1px solid var(--border2);padding:.8rem;margin-top:1.1rem;font-family:var(--mono);font-size:.62rem;color:var(--ink2);line-height:1.85}
+    .err{color:var(--terra);font-family:var(--mono);font-size:.68rem;margin-top:.4rem}
+    /* PROFILE */
+    .profile-grid{display:grid;grid-template-columns:240px 1fr;gap:2rem;align-items:start}
+    .profile-card{background:white;border:1px solid var(--border);padding:1.75rem;text-align:center}
+    .avatar{width:72px;height:72px;border-radius:50%;background:var(--ink);color:var(--cream);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.8rem;font-weight:300;margin:0 auto 1rem}
+    .profile-name{font-family:var(--serif);font-size:1.3rem;font-style:italic;font-weight:300;margin-bottom:.25rem}
+    .profile-email{font-family:var(--mono);font-size:.65rem;color:var(--ink2);margin-bottom:1rem}
+    .profile-stat{display:flex;justify-content:center;gap:1.5rem;padding:.85rem 0;border-top:1px solid var(--border2)}
+    .pst-n{font-family:var(--serif);font-size:1.4rem;font-weight:300;display:block;text-align:center}
+    .pst-l{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+    .logout-btn{width:100%;margin-top:1.25rem;background:none;border:1px solid var(--border);font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.65rem;cursor:pointer;color:var(--ink2);transition:all .2s}
+    .logout-btn:hover{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+    /* ADMIN */
+    .admin-tabs{display:flex;margin-bottom:1.75rem;border-bottom:2px solid var(--border)}
+    .atab{font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.7rem 1.2rem;border:none;background:none;cursor:pointer;color:var(--ink2);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+    .atab.on{color:var(--terra);border-bottom-color:var(--terra)}
+    .atable{width:100%;border-collapse:collapse;font-size:.88rem}
+    .atable th{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);padding:.7rem .95rem;text-align:left;border-bottom:2px solid var(--border);background:var(--cream)}
+    .atable td{padding:.8rem .95rem;border-bottom:1px solid var(--border2);vertical-align:middle}
+    .atable tr:hover td{background:var(--cream)}
+    .eb{background:none;border:1px solid var(--border);font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;padding:.28rem .55rem;cursor:pointer;transition:all .15s;margin-right:.35rem}
+    .eb:hover{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+    .db{background:none;border:1px solid #ffcdd2;font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;padding:.28rem .55rem;cursor:pointer;color:#c62828;transition:all .15s}
+    .db:hover{background:#c62828;color:white;border-color:#c62828}
+    .add-btn{background:var(--terra);color:white;border:none;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:.55rem 1.15rem;cursor:pointer;margin-bottom:1.4rem;transition:background .2s}
+    .add-btn:hover{background:var(--terra2)}
+    .stat-sel{font-family:var(--mono);font-size:.68rem;padding:.28rem .45rem;border:1px solid var(--border);background:white;cursor:pointer}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5px;background:var(--border);border:1px solid var(--border);margin-bottom:1.75rem}
+    .stat-card{background:var(--warm);padding:1.35rem}
+    .stat-lbl{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink2);margin-bottom:.35rem}
+    .stat-val{font-family:var(--serif);font-size:1.85rem;font-weight:300}
+    .stat-sub{font-family:var(--mono);font-size:.6rem;color:var(--sage);margin-top:.15rem}
+    .stock-warn{background:#FFF8E1;border-left:3px solid #F57F17;padding:.6rem .85rem;font-family:var(--mono);font-size:.65rem;color:#F57F17;margin-bottom:.75rem}
+    /* MODAL */
+    .mov{position:fixed;inset:0;background:rgba(26,22,18,.72);z-index:400;display:flex;align-items:center;justify-content:center;padding:1rem}
+    .modal{background:white;max-width:500px;width:100%;padding:2rem;max-height:90vh;overflow-y:auto;animation:fadeUp .22s ease}
+    .modal-t{font-family:var(--serif);font-size:1.35rem;font-style:italic;font-weight:300;margin-bottom:1.35rem;padding-bottom:.7rem;border-bottom:1px solid var(--border2)}
+    .modal-acts{display:flex;gap:.65rem;margin-top:1.35rem}
+    .msave{flex:1;background:var(--ink);color:var(--cream);border:none;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:.75rem;cursor:pointer;transition:background .2s}
+    .msave:hover{background:var(--terra)}
+    .mcancel{background:none;border:1px solid var(--border);font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:.75rem 1.1rem;cursor:pointer;color:var(--ink2);transition:all .15s}
+    .mcancel:hover{background:var(--cream)}
+    /* SUCCESS */
+    .success-box{text-align:center;padding:5rem 2rem;max-width:460px;margin:0 auto}
+    .success-icon{font-size:2.8rem;margin-bottom:1.35rem}
+    .success-t{font-family:var(--serif);font-size:1.9rem;font-style:italic;font-weight:300;margin-bottom:.65rem}
+    .success-m{color:var(--ink2);font-style:italic;margin-bottom:.4rem;line-height:1.7}
+    .success-id{font-family:var(--mono);font-size:.85rem;color:var(--terra);margin-bottom:1.75rem;letter-spacing:.1em}
+    /* TOAST */
+    .toast{position:fixed;bottom:1.75rem;right:1.75rem;background:var(--ink);color:var(--cream);padding:.8rem 1.35rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.07em;z-index:500;animation:fadeUp .25s ease;max-width:280px;border-left:3px solid var(--sage)}
+    .toast.terr{border-left-color:var(--terra)}
+    /* TAG */
+    .tag{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;padding:.18rem .5rem;background:var(--cream);border:1px solid var(--border);color:var(--ink2);display:inline-block}
+    .tag.admin{background:#FFF3E0;border-color:#FFCC80;color:#E65100}
+    .tag.user{background:#E3F2FD;border-color:#90CAF9;color:#1565C0}
+    /* MISC */
+    .divider{height:1px;background:var(--border2);margin:1.5rem 0}
+    .mb1{margin-bottom:1rem}.mb15{margin-bottom:1.5rem}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    /* WISHLIST */
+    .wish-empty{text-align:center;padding:4rem 2rem;color:var(--ink2);font-style:italic}
+    /* FOOTER */
+    footer{background:var(--ink);color:rgba(245,240,232,.45);padding:2rem;text-align:center;margin-top:auto}
+    /* RESPONSIVE */
+    @media(max-width:700px){
+      .co-grid,.profile-grid{grid-template-columns:1fr}
+      .stats-grid{grid-template-columns:1fr 1fr}
+      .inp-row{grid-template-columns:1fr}
+      .nav{padding:0 1rem}
+      .nb{font-size:.6rem;padding:.4rem .55rem}
+      .page{padding:1.25rem}
+      .hero-strip{gap:1.25rem}
+      .citem{grid-template-columns:2.5rem 1fr auto}
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useReducer, useContext, createContext, useEffect } = React;
+
+// ══════════════════════════════════════════════
+//  DATABASE  (localStorage-backed)
+// ══════════════════════════════════════════════
+const INIT_PRODUCTS = [
+  {id:1,name:"Arc Lamp No. 9",category:"Lighting",price:349,stock:12,image:"💡",description:"Sculptural floor lamp with articulated brass arm and marble base.",featured:true},
+  {id:2,name:"Woven Wool Throw",category:"Textiles",price:189,stock:8,image:"🧶",description:"Hand-loomed merino blend in natural undyed tones.",featured:true},
+  {id:3,name:"Ceramic Pour-Over",category:"Kitchen",price:78,stock:24,image:"☕",description:"Wheel-thrown stoneware with matte glaze finish.",featured:true},
+  {id:4,name:"Oak Side Table",category:"Furniture",price:520,stock:5,image:"🪵",description:"Solid white oak with tapered legs and raw edge top.",featured:false},
+  {id:5,name:"Linen Pillowcase Set",category:"Textiles",price:95,stock:30,image:"🛏️",description:"Belgian flax linen, enzyme washed for softness.",featured:false},
+  {id:6,name:"Beeswax Candle Trio",category:"Decor",price:54,stock:50,image:"🕯️",description:"Pure beeswax with cotton wicks. Warm honey scent.",featured:true},
+  {id:7,name:"Cast Iron Skillet",category:"Kitchen",price:145,stock:18,image:"🍳",description:"Pre-seasoned 10-inch with helper handle.",featured:false},
+  {id:8,name:"Rattan Mirror",category:"Decor",price:230,stock:7,image:"🪞",description:'Handwoven rattan frame, 24" round.',featured:false},
+  {id:9,name:"Marble Cheese Board",category:"Kitchen",price:112,stock:15,image:"🧀",description:"Honed Carrara marble with walnut handle.",featured:false},
+  {id:10,name:"Linen Apron",category:"Kitchen",price:68,stock:22,image:"👔",description:"Stonewashed linen with adjustable neck strap.",featured:false},
+  {id:11,name:"Brass Wall Hook Set",category:"Decor",price:87,stock:35,image:"🔩",description:"Set of 3 hand-cast solid brass hooks. Aged finish.",featured:false},
+  {id:12,name:"Terracotta Planter",category:"Decor",price:42,stock:40,image:"🪴",description:"Hand-thrown terracotta with drainage hole and saucer.",featured:false},
+];
+const INIT_USERS = [
+  {id:1,name:"Admin User",email:"admin@shop.com",password:"admin123",role:"admin"},
+  {id:2,name:"Jane Doe",email:"user@shop.com",password:"user123",role:"user"},
+];
+const INIT_ORDERS = [
+  {id:"ORD-001",userId:2,date:"2024-03-12",status:"delivered",total:427,items:[{productId:1,qty:1,price:349},{productId:3,qty:1,price:78}]},
+  {id:"ORD-002",userId:2,date:"2024-04-18",status:"shipped",total:189,items:[{productId:2,qty:1,price:189}]},
+  {id:"ORD-003",userId:2,date:"2024-05-02",status:"processing",total:630,items:[{productId:4,qty:1,price:520},{productId:6,qty:2,price:54}]},
+];
+function loadDB(){try{const s=localStorage.getItem("oe_db");if(s)return JSON.parse(s);}catch{}return{users:INIT_USERS,products:INIT_PRODUCTS,orders:INIT_ORDERS,nextId:4};}
+function saveDB(db){try{localStorage.setItem("oe_db",JSON.stringify(db));}catch{}}
+let DB = loadDB();
+
+// ══════════════════════════════════════════════
+//  CONTEXTS
+// ══════════════════════════════════════════════
+const AppCtx  = createContext(null);
+const CartCtx = createContext(null);
+function cartReducer(state,action){
+  switch(action.type){
+    case "ADD":{const e=state.find(i=>i.productId===action.p.id);if(e)return state.map(i=>i.productId===action.p.id?{...i,qty:i.qty+1}:i);return[...state,{productId:action.p.id,name:action.p.name,price:action.p.price,image:action.p.image,qty:1}];}
+    case "REMOVE":return state.filter(i=>i.productId!==action.id);
+    case "QTY":return state.map(i=>i.productId===action.id?{...i,qty:action.qty}:i).filter(i=>i.qty>0);
+    case "CLEAR":return[];
+    default:return state;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function Badge({status}){return <span className={`sbadge s-${status}`}>{status}</span>;}
+function Tag({children,v=""}){return <span className={`tag ${v}`}>{children}</span>;}
+function useToast(){
+  const [t,setT]=useState(null);
+  const show=(msg,type="ok")=>{setT({msg,type});setTimeout(()=>setT(null),2600);};
+  return [t,show];
+}
+const STEPS=["pending","processing","shipped","delivered"];
+function Timeline({status}){
+  const cur=STEPS.indexOf(status);
+  return(
+    <div className="timeline">
+      {STEPS.map((s,i)=>{
+        const done=i<cur,active=i===cur;
+        return(
+          <div key={s} className="tl-step">
+            <div className={`tl-dot${done?" done":""}${active?" active":""}`}>{done?"✓":i+1}</div>
+            <div className={`tl-lbl${done?" done":""}${active?" active":""}`}>{s}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  AUTH PAGE
+// ══════════════════════════════════════════════
+function AuthPage(){
+  const {navigate,login}=useContext(AppCtx);
+  const [mode,setMode]=useState("login");
+  const [form,setForm]=useState({name:"",email:"",password:""});
+  const [error,setError]=useState("");
+  const f=k=>e=>setForm({...form,[k]:e.target.value});
+  const submit=()=>{
+    setError("");
+    if(mode==="login"){
+      const u=DB.users.find(u=>u.email===form.email&&u.password===form.password);
+      if(!u)return setError("Invalid email or password.");
+      login(u);navigate("catalog");
+    }else{
+      if(!form.name||!form.email||!form.password)return setError("All fields required.");
+      if(form.password.length<6)return setError("Password must be at least 6 characters.");
+      if(DB.users.find(u=>u.email===form.email))return setError("Email already registered.");
+      const nu={id:DB.users.length+1,name:form.name,email:form.email,password:form.password,role:"user"};
+      DB.users.push(nu);saveDB(DB);login(nu);navigate("catalog");
+    }
+  };
+  return(
+    <div className="wide">
+      <div className="auth-wrap">
+        <div className="auth-t">{mode==="login"?"Welcome back":"Create account"}</div>
+        <div className="auth-st">{mode==="login"?"Sign in to continue":"Join our community"}</div>
+        {mode==="register"&&<div className="mb1"><label className="lbl">Full Name</label><input className="inp" value={form.name} onChange={f("name")} placeholder="Jane Doe"/></div>}
+        <div className="mb1"><label className="lbl">Email</label><input className="inp" type="email" value={form.email} onChange={f("email")} placeholder="you@example.com"/></div>
+        <div className="mb1"><label className="lbl">Password</label><input className="inp" type="password" value={form.password} onChange={f("password")} placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&submit()}/></div>
+        {error&&<div className="err">{error}</div>}
+        <button className="auth-btn" onClick={submit}>{mode==="login"?"Sign In":"Create Account"}</button>
+        <div className="auth-sw">{mode==="login"?"New here? ":"Have an account? "}<button onClick={()=>{setMode(mode==="login"?"register":"login");setError("");}}>{ mode==="login"?"Create account":"Sign in"}</button></div>
+        <div className="auth-hint">Demo credentials:<br/>🔑 Admin — admin@shop.com / admin123<br/>👤 User — user@shop.com / user123</div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  PRODUCT DETAIL MODAL
+// ══════════════════════════════════════════════
+function ProductModal({product,onClose,onAdd,wishlist,onWish}){
+  if(!product)return null;
+  const inW=wishlist.includes(product.id);
+  return(
+    <div className="pmod-ov" onClick={onClose}>
+      <div className="pmod" onClick={e=>e.stopPropagation()}>
+        <button className="pmod-close" onClick={onClose}>✕</button>
+        <div className="pmod-img">{product.image}</div>
+        <div className="pmod-body">
+          <div className="pmod-cat">{product.category}</div>
+          <div className="pmod-name">{product.name}</div>
+          <div className="pmod-desc">{product.description}</div>
+          <div className="pmod-price">${product.price}</div>
+          <div className="pmod-stock">{product.stock>5?`${product.stock} in stock`:product.stock>0?`Only ${product.stock} left`:"Out of stock"}</div>
+          <div className="pmod-acts">
+            <button className="pmod-add" disabled={product.stock===0} onClick={()=>{onAdd(product);onClose();}}>Add to Cart</button>
+            <button className="pmod-wish" onClick={()=>onWish(product.id)}>{inW?"❤️":"🤍"}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  CATALOG PAGE
+// ══════════════════════════════════════════════
+function CatalogPage(){
+  const {wishlist,toggleWish}=useContext(AppCtx);
+  const {dispatch}=useContext(CartCtx);
+  const [toast,showToast]=useToast();
+  const [filter,setFilter]=useState("All");
+  const [search,setSearch]=useState("");
+  const [sort,setSort]=useState("default");
+  const [detail,setDetail]=useState(null);
+  const categories=["All",...new Set(DB.products.map(p=>p.category))];
+  let visible=DB.products
+    .filter(p=>filter==="All"||p.category===filter)
+    .filter(p=>p.name.toLowerCase().includes(search.toLowerCase())||p.description.toLowerCase().includes(search.toLowerCase()));
+  if(sort==="price-asc") visible=[...visible].sort((a,b)=>a.price-b.price);
+  if(sort==="price-desc")visible=[...visible].sort((a,b)=>b.price-a.price);
+  if(sort==="name")      visible=[...visible].sort((a,b)=>a.name.localeCompare(b.name));
+  const addCart=p=>{dispatch({type:"ADD",p});showToast(`${p.name} added to cart`);};
+  return(
+    <div>
+      <div className="hero">
+        <div className="hero-eye">Curated Collection · 2024</div>
+        <h1 className="hero-h">Objects for<br/>living beautifully</h1>
+        <p className="hero-sub">A carefully considered edit of homeware, textiles and objects for the considered home.</p>
+        <button className="hero-cta" onClick={()=>document.getElementById("cat")?.scrollIntoView({behavior:"smooth"})}>Explore Collection</button>
+        <div className="hero-strip">
+          <div><div className="hero-stat-n">{DB.products.length}</div><div className="hero-stat-l">Products</div></div>
+          <div><div className="hero-stat-n">Free</div><div className="hero-stat-l">Ship over $200</div></div>
+          <div><div className="hero-stat-n">30</div><div className="hero-stat-l">Day returns</div></div>
+        </div>
+      </div>
+      <div className="page" id="cat">
+        <div style={{display:"flex",gap:"1rem",alignItems:"center",marginBottom:"1.5rem"}}>
+          <div className="search-wrap"><span className="search-icon">🔍</span><input className="search-input" placeholder="Search products…" value={search} onChange={e=>setSearch(e.target.value)}/></div>
+          <select className="sort-sel" value={sort} onChange={e=>setSort(e.target.value)}>
+            <option value="default">Sort: Default</option>
+            <option value="price-asc">Price: Low → High</option>
+            <option value="price-desc">Price: High → Low</option>
+            <option value="name">Name A → Z</option>
+          </select>
+        </div>
+        <div className="filters">{categories.map(c=><button key={c} className={`fb${filter===c?" on":""}`} onClick={()=>setFilter(c)}>{c}</button>)}</div>
+        <div className="sec-hd"><span className="sec-t">Products</span><span className="sec-c">{visible.length} items</span></div>
+        {visible.length===0&&<div style={{textAlign:"center",padding:"4rem",color:"var(--ink2)",fontStyle:"italic"}}>No products found.</div>}
+        <div className="pgrid">
+          {visible.map(p=>(
+            <div key={p.id} className="pcard" onClick={()=>setDetail(p)}>
+              {p.featured&&<span className="feat-badge">Featured</span>}
+              <button className={`pwish${wishlist.includes(p.id)?" saved":""}`} onClick={e=>{e.stopPropagation();toggleWish(p.id);}}>{wishlist.includes(p.id)?"❤️":"🤍"}</button>
+              <span className="pemoji">{p.image}</span>
+              <div className="pcat">{p.category}</div>
+              <div className="pname">{p.name}</div>
+              <div className="pdesc">{p.description}</div>
+              <div className="pfoot">
+                <div><div className="pprice">${p.price}</div><div className={`pstock${p.stock<=5?" low":""}`}>{p.stock<=5?`Only ${p.stock} left`:`${p.stock} in stock`}</div></div>
+                <button className="pcta" onClick={e=>{e.stopPropagation();addCart(p);}}>Add</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {detail&&<ProductModal product={detail} onClose={()=>setDetail(null)} onAdd={addCart} wishlist={wishlist} onWish={toggleWish}/>}
+      {toast&&<div className="toast">{toast.msg}</div>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  WISHLIST PAGE
+// ══════════════════════════════════════════════
+function WishlistPage(){
+  const {wishlist,toggleWish}=useContext(AppCtx);
+  const {dispatch}=useContext(CartCtx);
+  const [toast,showToast]=useToast();
+  const items=DB.products.filter(p=>wishlist.includes(p.id));
+  const addCart=p=>{dispatch({type:"ADD",p});showToast(`${p.name} added to cart`);};
+  return(
+    <div className="page">
+      <div className="sec-hd"><span className="sec-t">Wishlist</span><span className="sec-c">{items.length} saved</span></div>
+      {items.length===0?<div className="wish-empty">Your wishlist is empty. Heart any product to save it here.</div>:
+      <div className="pgrid">
+        {items.map(p=>(
+          <div key={p.id} className="pcard">
+            <button className="pwish saved" style={{opacity:1}} onClick={()=>toggleWish(p.id)}>❤️</button>
+            <span className="pemoji">{p.image}</span>
+            <div className="pcat">{p.category}</div>
+            <div className="pname">{p.name}</div>
+            <div className="pdesc">{p.description}</div>
+            <div className="pfoot">
+              <div className="pprice">${p.price}</div>
+              <button className="pcta" style={{opacity:1,transform:"none"}} onClick={()=>addCart(p)}>Add to Cart</button>
+            </div>
+          </div>
+        ))}
+      </div>}
+      {toast&&<div className="toast">{toast.msg}</div>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  CART PAGE
+// ══════════════════════════════════════════════
+function CartPage(){
+  const {user,navigate}=useContext(AppCtx);
+  const {cart,dispatch}=useContext(CartCtx);
+  const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const ship=sub>200?0:12;
+  if(cart.length===0)return(
+    <div className="page">
+      <div className="sec-hd"><span className="sec-t">Your Cart</span></div>
+      <div className="cart-empty">
+        <div style={{fontSize:"2.5rem",marginBottom:".75rem",opacity:.35}}>🛒</div>
+        <div style={{fontStyle:"italic",color:"var(--ink2)"}}>Your cart is empty.</div>
+        <button className="auth-btn" style={{maxWidth:200,margin:"1.5rem auto 0",display:"block"}} onClick={()=>navigate("catalog")}>Continue Shopping</button>
+      </div>
+    </div>
+  );
+  return(
+    <div className="page">
+      <div className="sec-hd"><span className="sec-t">Your Cart</span><span className="sec-c">{cart.length} items</span></div>
+      <div style={{maxWidth:720}}>
+        {cart.map(item=>(
+          <div key={item.productId} className="citem">
+            <div className="citem-emoji">{item.image}</div>
+            <div><div className="citem-name">{item.name}</div><div className="citem-price">${item.price} each · subtotal ${item.price*item.qty}</div></div>
+            <div className="qty-ctrl">
+              <button className="qb" onClick={()=>dispatch({type:"QTY",id:item.productId,qty:item.qty-1})}>−</button>
+              <span className="qv">{item.qty}</span>
+              <button className="qb" onClick={()=>dispatch({type:"QTY",id:item.productId,qty:item.qty+1})}>+</button>
+            </div>
+            <button className="rmv" onClick={()=>dispatch({type:"REMOVE",id:item.productId})}>✕</button>
+          </div>
+        ))}
+        <div className="cart-sum">
+          <div className="srow"><span>Subtotal</span><span>${sub}</span></div>
+          <div className="srow"><span>Shipping</span><span>{ship===0?"Free":`$${ship}`}</span></div>
+          {ship>0&&<div className="free-ship">Add ${200-sub} more for free shipping</div>}
+          <div className="srow tot"><span>Total</span><span>${sub+ship}</span></div>
+          <button className="checkout-btn" onClick={()=>user?navigate("checkout"):navigate("auth")}>Proceed to Checkout →</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  CHECKOUT PAGE
+// ══════════════════════════════════════════════
+function CheckoutPage(){
+  const {user,navigate,setLastOrder}=useContext(AppCtx);
+  const {cart,dispatch}=useContext(CartCtx);
+  const [form,setForm]=useState({name:user?.name||"",email:user?.email||"",address:"",city:"",zip:"",card:"",expiry:"",cvv:""});
+  const [error,setError]=useState("");
+  const f=k=>e=>setForm({...form,[k]:e.target.value});
+  const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const ship=sub>200?0:12;
+  const total=sub+ship;
+  const place=()=>{
+    const {name,email,address,city,zip,card,expiry,cvv}=form;
+    if(!name||!email||!address||!city||!zip||!card||!expiry||!cvv)return setError("Please fill in all fields.");
+    if(card.replace(/\s/g,"").length<12)return setError("Enter a valid card number.");
+    const id=`ORD-${String(DB.nextId++).padStart(3,"0")}`;
+    const order={id,userId:user.id,date:new Date().toISOString().split("T")[0],status:"processing",total,items:cart.map(i=>({productId:i.productId,qty:i.qty,price:i.price}))};
+    DB.orders.push(order);saveDB(DB);dispatch({type:"CLEAR"});setLastOrder(order);navigate("success");
+  };
+  return(
+    <div className="page">
+      <div className="sec-hd"><span className="sec-t">Checkout</span></div>
+      <div className="co-grid">
+        <div>
+          <div className="form-t">Delivery Information</div>
+          <div className="inp-row mb1">
+            <div><label className="lbl">Full Name</label><input className="inp" value={form.name} onChange={f("name")}/></div>
+            <div><label className="lbl">Email</label><input className="inp" type="email" value={form.email} onChange={f("email")}/></div>
+          </div>
+          <div className="mb1"><label className="lbl">Street Address</label><input className="inp" value={form.address} onChange={f("address")}/></div>
+          <div className="inp-row mb15">
+            <div><label className="lbl">City</label><input className="inp" value={form.city} onChange={f("city")}/></div>
+            <div><label className="lbl">ZIP Code</label><input className="inp" value={form.zip} onChange={f("zip")}/></div>
+          </div>
+          <div className="form-t">Payment Details</div>
+          <div className="mb1"><label className="lbl">Card Number</label><input className="inp" value={form.card} onChange={f("card")} placeholder="4242 4242 4242 4242"/></div>
+          <div className="inp-row">
+            <div><label className="lbl">Expiry (MM/YY)</label><input className="inp" value={form.expiry} onChange={f("expiry")} placeholder="06/27"/></div>
+            <div><label className="lbl">CVV</label><input className="inp" value={form.cvv} onChange={f("cvv")} placeholder="123"/></div>
+          </div>
+          {error&&<div className="err" style={{marginTop:".65rem"}}>{error}</div>}
+          <button className="place-btn" onClick={place}>Place Order · ${total}</button>
+        </div>
+        <div className="co-aside">
+          <div className="co-aside-t">Order Summary</div>
+          {cart.map(i=><div key={i.productId} style={{display:"flex",justifyContent:"space-between",marginBottom:".55rem",fontSize:".88rem"}}><span style={{fontStyle:"italic"}}>{i.image} {i.name} ×{i.qty}</span><span style={{fontFamily:"var(--mono)",fontSize:".78rem"}}>${i.price*i.qty}</span></div>)}
+          <div className="divider"/>
+          <div className="srow"><span>Subtotal</span><span>${sub}</span></div>
+          <div className="srow"><span>Shipping</span><span>{ship===0?"Free":`$${ship}`}</span></div>
+          <div style={{display:"flex",justifyContent:"space-between",paddingTop:".65rem",borderTop:"1px solid var(--border)"}}>
+            <span style={{fontFamily:"var(--mono)",fontSize:".88rem",fontWeight:500}}>Total</span>
+            <span style={{fontFamily:"var(--mono)",fontSize:".88rem"}}>${total}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  SUCCESS PAGE
+// ══════════════════════════════════════════════
+function SuccessPage(){
+  const {lastOrder,navigate}=useContext(AppCtx);
+  return(
+    <div className="page">
+      <div className="success-box">
+        <div className="success-icon">✦</div>
+        <div className="success-t">Order Confirmed</div>
+        <div className="success-m">Your order has been received and is being prepared.</div>
+        <div className="success-id">{lastOrder?.id}</div>
+        <Timeline status="processing"/>
+        <div style={{display:"flex",gap:".75rem",marginTop:"1.75rem",justifyContent:"center"}}>
+          <button className="auth-btn" style={{maxWidth:180}} onClick={()=>navigate("orders")}>Track Order</button>
+          <button className="mcancel" onClick={()=>navigate("catalog")}>Continue Shopping</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  ORDERS PAGE
+// ══════════════════════════════════════════════
+function OrdersPage(){
+  const {user}=useContext(AppCtx);
+  const [open,setOpen]=useState(null);
+  const orders=DB.orders.filter(o=>o.userId===user.id).slice().reverse();
+  return(
+    <div className="page">
+      <div className="sec-hd"><span className="sec-t">Your Orders</span><span className="sec-c">{orders.length} orders</span></div>
+      {orders.length===0?<div style={{textAlign:"center",padding:"4rem",color:"var(--ink2)",fontStyle:"italic"}}>No orders yet.</div>:orders.map(o=>(
+        <div key={o.id} className="ocard">
+          <div className="ohd" onClick={()=>setOpen(open===o.id?null:o.id)}>
+            <div><div className="oid">{o.id}</div><div className="odate">{o.date}</div></div>
+            <div style={{display:"flex",alignItems:"center",gap:".9rem"}}>
+              <Badge status={o.status}/>
+              <span style={{fontFamily:"var(--mono)",fontSize:".8rem"}}>${o.total}</span>
+              <span style={{fontSize:".65rem",color:"var(--ink3)"}}>{open===o.id?"▲":"▼"}</span>
+            </div>
+          </div>
+          {open===o.id&&(
+            <div className="obody">
+              {o.items.map((item,i)=>{const p=DB.products.find(pr=>pr.id===item.productId);return(
+                <div key={i} className="oitem-row"><span>{p?.image} {p?.name||"Item"} × {item.qty}</span><span style={{fontFamily:"var(--mono)",fontSize:".78rem"}}>${item.price*item.qty}</span></div>
+              );})}
+              <div className="otot"><span>Total</span><span>${o.total}</span></div>
+              {o.status!=="cancelled"&&<Timeline status={o.status}/>}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  PROFILE PAGE
+// ══════════════════════════════════════════════
+function ProfilePage(){
+  const {user,logout,navigate,wishlist}=useContext(AppCtx);
+  const [form,setForm]=useState({name:user.name,email:user.email});
+  const [saved,setSaved]=useState(false);
+  const f=k=>e=>setForm({...form,[k]:e.target.value});
+  const save=()=>{const idx=DB.users.findIndex(u=>u.id===user.id);DB.users[idx]={...DB.users[idx],...form};saveDB(DB);setSaved(true);setTimeout(()=>setSaved(false),2000);};
+  const userOrders=DB.orders.filter(o=>o.userId===user.id);
+  const spent=userOrders.reduce((s,o)=>s+o.total,0);
+  const initials=user.name.split(" ").map(n=>n[0]).join("").toUpperCase().slice(0,2);
+  return(
+    <div className="page">
+      <div className="sec-hd"><span className="sec-t">My Account</span></div>
+      <div className="profile-grid">
+        <div className="profile-card">
+          <div className="avatar">{initials}</div>
+          <div className="profile-name">{user.name}</div>
+          <div className="profile-email">{user.email}</div>
+          <Tag v={user.role}>{user.role}</Tag>
+          <div className="profile-stat">
+            <div><span className="pst-n">{userOrders.length}</span><span className="pst-l">Orders</span></div>
+            <div><span className="pst-n">${spent}</span><span className="pst-l">Spent</span></div>
+            <div><span className="pst-n">{wishlist.length}</span><span className="pst-l">Saved</span></div>
+          </div>
+          <button className="logout-btn" onClick={()=>{logout();navigate("catalog");}}>Sign Out</button>
+        </div>
+        <div>
+          <div className="form-t">Edit Profile</div>
+          <div className="mb1"><label className="lbl">Full Name</label><input className="inp" value={form.name} onChange={f("name")}/></div>
+          <div className="mb1"><label className="lbl">Email Address</label><input className="inp" value={form.email} onChange={f("email")}/></div>
+          <button className="auth-btn" style={{maxWidth:180}} onClick={save}>{saved?"✓ Saved!":"Save Changes"}</button>
+          <div className="divider"/>
+          <div className="form-t">Recent Activity</div>
+          {userOrders.slice(-4).reverse().map(o=>(
+            <div key={o.id} style={{display:"flex",justifyContent:"space-between",padding:".6rem 0",borderBottom:"1px solid var(--border2)",fontSize:".88rem"}}>
+              <div><span style={{fontFamily:"var(--mono)",fontSize:".75rem",marginRight:".5rem"}}>{o.id}</span><span style={{fontFamily:"var(--mono)",fontSize:".65rem",color:"var(--ink2)"}}>{o.date}</span></div>
+              <div style={{display:"flex",alignItems:"center",gap:".6rem"}}><Badge status={o.status}/><span style={{fontFamily:"var(--mono)",fontSize:".78rem"}}>${o.total}</span></div>
+            </div>
+          ))}
+          {userOrders.length===0&&<div style={{fontStyle:"italic",color:"var(--ink2)",fontSize:".9rem"}}>No orders yet.</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  ADMIN DASHBOARD
+// ══════════════════════════════════════════════
+function AdminDashboard(){
+  const [tab,setTab]=useState("overview");
+  const [prods,setProds]=useState([...DB.products]);
+  const [orders,setOrders]=useState([...DB.orders]);
+  const [modal,setModal]=useState(null);
+  const [form,setForm]=useState({});
+  const [toast,showToast]=useToast();
+  const f=k=>e=>setForm({...form,[k]:e.target.value});
+  const totalRev=DB.orders.reduce((s,o)=>s+o.total,0);
+  const avgOrder=DB.orders.length?Math.round(totalRev/DB.orders.length):0;
+  const lowStock=DB.products.filter(p=>p.stock<=5);
+  const saveProd=()=>{
+    if(form.id){const idx=DB.products.findIndex(p=>p.id===form.id);DB.products[idx]={...form,price:+form.price,stock:+form.stock};}
+    else DB.products.push({...form,id:Date.now(),price:+form.price,stock:+form.stock,featured:false,image:form.image||"📦"});
+    saveDB(DB);setProds([...DB.products]);setModal(null);showToast("Product saved");
+  };
+  const delProd=id=>{DB.products.splice(DB.products.findIndex(p=>p.id===id),1);saveDB(DB);setProds([...DB.products]);showToast("Deleted","terr");};
+  const updateStatus=(id,status)=>{const o=DB.orders.find(o=>o.id===id);if(o)o.status=status;saveDB(DB);setOrders([...DB.orders]);showToast("Status updated");};
+  const FIELDS=[["name","Product Name"],["category","Category"],["price","Price ($)"],["stock","Stock Qty"],["image","Emoji Icon"],["description","Description"]];
+  return(
+    <div className="wide" style={{maxWidth:1100,margin:"0 auto"}}>
+      <div style={{display:"flex",alignItems:"baseline",gap:".75rem",marginBottom:"1.5rem"}}>
+        <h1 style={{fontFamily:"var(--serif)",fontSize:"1.9rem",fontWeight:300,fontStyle:"italic"}}>Admin Dashboard</h1>
+        <Tag v="admin">Admin</Tag>
+      </div>
+      {lowStock.length>0&&<div className="stock-warn">⚠ Low stock: {lowStock.map(p=>p.name).join(", ")}</div>}
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-lbl">Total Revenue</div><div className="stat-val">${totalRev.toLocaleString()}</div><div className="stat-sub">All-time</div></div>
+        <div className="stat-card"><div className="stat-lbl">Orders</div><div className="stat-val">{DB.orders.length}</div><div className="stat-sub">Avg. ${avgOrder}</div></div>
+        <div className="stat-card"><div className="stat-lbl">Products</div><div className="stat-val">{DB.products.length}</div><div className="stat-sub">{lowStock.length} low stock</div></div>
+        <div className="stat-card"><div className="stat-lbl">Users</div><div className="stat-val">{DB.users.length}</div><div className="stat-sub">Registered</div></div>
+      </div>
+      <div className="admin-tabs">
+        {["overview","products","orders","users"].map(t=><button key={t} className={`atab${tab===t?" on":""}`} onClick={()=>setTab(t)}>{t}</button>)}
+      </div>
+
+      {tab==="overview"&&(
+        <div>
+          <div style={{fontFamily:"var(--serif)",fontSize:"1.05rem",fontStyle:"italic",color:"var(--ink2)",marginBottom:"1rem"}}>Recent Orders</div>
+          <table className="atable">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Status</th><th>Total</th></tr></thead>
+            <tbody>{[...DB.orders].reverse().slice(0,8).map(o=>{const u=DB.users.find(u=>u.id===o.userId);return(
+              <tr key={o.id}>
+                <td style={{fontFamily:"var(--mono)",fontSize:".75rem"}}>{o.id}</td>
+                <td>{u?.name||"Guest"}</td>
+                <td style={{fontFamily:"var(--mono)",fontSize:".72rem"}}>{o.date}</td>
+                <td><Badge status={o.status}/></td>
+                <td style={{fontFamily:"var(--mono)",fontSize:".82rem"}}>${o.total}</td>
+              </tr>
+            );})}</tbody>
+          </table>
+          <div style={{marginTop:"1.75rem"}}>
+            <div style={{fontFamily:"var(--serif)",fontSize:"1.05rem",fontStyle:"italic",color:"var(--ink2)",marginBottom:".85rem"}}>Revenue by Status</div>
+            {["delivered","shipped","processing","pending"].map(s=>{
+              const val=DB.orders.filter(o=>o.status===s).reduce((sum,o)=>sum+o.total,0);
+              const pct=totalRev?Math.round(val/totalRev*100):0;
+              return(
+                <div key={s} style={{display:"flex",alignItems:"center",gap:".75rem",marginBottom:".65rem"}}>
+                  <div style={{fontFamily:"var(--mono)",fontSize:".62rem",width:80,textTransform:"capitalize",color:"var(--ink2)"}}>{s}</div>
+                  <div style={{flex:1,height:12,background:"var(--cream)",border:"1px solid var(--border)",borderRadius:2,overflow:"hidden"}}>
+                    <div style={{height:"100%",width:`${pct}%`,background:"var(--terra)",transition:"width .4s"}}/>
+                  </div>
+                  <div style={{fontFamily:"var(--mono)",fontSize:".65rem",width:60,textAlign:"right"}}>${val.toLocaleString()}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {tab==="products"&&(
+        <div>
+          <button className="add-btn" onClick={()=>{setForm({name:"",category:"",price:"",stock:"",description:"",image:"📦"});setModal("prod");}}>+ Add Product</button>
+          <table className="atable">
+            <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+            <tbody>{prods.map(p=>(
+              <tr key={p.id}>
+                <td>{p.image} {p.name}</td>
+                <td><Tag>{p.category}</Tag></td>
+                <td style={{fontFamily:"var(--mono)",fontSize:".82rem"}}>${p.price}</td>
+                <td style={{fontFamily:"var(--mono)",fontSize:".82rem",color:p.stock<=5?"#c62828":"inherit"}}>{p.stock}{p.stock<=5&&" ⚠"}</td>
+                <td><button className="eb" onClick={()=>{setForm({...p});setModal("prod");}}>Edit</button><button className="db" onClick={()=>delProd(p.id)}>Delete</button></td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      )}
+
+      {tab==="orders"&&(
+        <table className="atable">
+          <thead><tr><th>Order ID</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>{[...orders].reverse().map(o=>(
+            <tr key={o.id}>
+              <td style={{fontFamily:"var(--mono)",fontSize:".75rem"}}>{o.id}</td>
+              <td style={{fontFamily:"var(--mono)",fontSize:".72rem"}}>{o.date}</td>
+              <td style={{fontFamily:"var(--mono)",fontSize:".72rem"}}>{o.items.length} items</td>
+              <td style={{fontFamily:"var(--mono)",fontSize:".82rem"}}>${o.total}</td>
+              <td><select className="stat-sel" value={o.status} onChange={e=>updateStatus(o.id,e.target.value)}>{["pending","processing","shipped","delivered","cancelled"].map(s=><option key={s}>{s}</option>)}</select></td>
+            </tr>
+          ))}</tbody>
+        </table>
+      )}
+
+      {tab==="users"&&(
+        <table className="atable">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Orders</th><th>Spent</th></tr></thead>
+          <tbody>{DB.users.map(u=>{const uo=DB.orders.filter(o=>o.userId===u.id);return(
+            <tr key={u.id}>
+              <td>{u.name}</td>
+              <td style={{fontFamily:"var(--mono)",fontSize:".75rem"}}>{u.email}</td>
+              <td><Tag v={u.role}>{u.role}</Tag></td>
+              <td style={{fontFamily:"var(--mono)",fontSize:".78rem"}}>{uo.length}</td>
+              <td style={{fontFamily:"var(--mono)",fontSize:".78rem"}}>${uo.reduce((s,o)=>s+o.total,0)}</td>
+            </tr>
+          );})}</tbody>
+        </table>
+      )}
+
+      {modal==="prod"&&(
+        <div className="mov" onClick={()=>setModal(null)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-t">{form.id?"Edit Product":"New Product"}</div>
+            {FIELDS.map(([k,lbl])=><div key={k} className="mb1"><label className="lbl">{lbl}</label><input className="inp" value={form[k]||""} onChange={f(k)}/></div>)}
+            <div className="modal-acts"><button className="mcancel" onClick={()=>setModal(null)}>Cancel</button><button className="msave" onClick={saveProd}>Save Product</button></div>
+          </div>
+        </div>
+      )}
+      {toast&&<div className={`toast${toast.type==="terr"?" terr":""}`}>{toast.msg}</div>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  NAV BAR
+// ══════════════════════════════════════════════
+function NavBar(){
+  const {user,page,navigate,wishlist}=useContext(AppCtx);
+  const {cart}=useContext(CartCtx);
+  const count=cart.reduce((s,i)=>s+i.qty,0);
+  return(
+    <nav className="nav">
+      <div className="nav-logo" onClick={()=>navigate("catalog")}>OAK<em>&</em>EARTH</div>
+      <div className="nav-links">
+        <button className={`nb${page==="catalog"?" on":""}`} onClick={()=>navigate("catalog")}>Shop</button>
+        {user&&<button className={`nb${page==="wishlist"?" on":""}`} onClick={()=>navigate("wishlist")}>Wishlist{wishlist.length>0?` (${wishlist.length})`:""}</button>}
+        {user&&<button className={`nb${page==="orders"?" on":""}`} onClick={()=>navigate("orders")}>Orders</button>}
+        {user&&<button className={`nb${page==="profile"?" on":""}`} onClick={()=>navigate("profile")}>Profile</button>}
+        {user?.role==="admin"&&<button className={`nb${page==="admin"?" on":""}`} onClick={()=>navigate("admin")}>Admin</button>}
+        {!user&&<button className={`nb${page==="auth"?" on":""}`} onClick={()=>navigate("auth")}>Sign In</button>}
+        <button className="nb cart" onClick={()=>navigate("cart")}>🛒 Cart{count>0&&<span className="badge">{count}</span>}</button>
+      </div>
+    </nav>
+  );
+}
+
+// ══════════════════════════════════════════════
+//  APP ROOT
+// ══════════════════════════════════════════════
+function App(){
+  const [user,setUser]=useState(null);
+  const [page,setPage]=useState("catalog");
+  const [wishlist,setWishlist]=useState([]);
+  const [lastOrder,setLastOrder]=useState(null);
+  const [cart,dispatch]=useReducer(cartReducer,[]);
+  const navigate=p=>setPage(p);
+  const login=u=>setUser(u);
+  const logout=()=>{setUser(null);setWishlist([]);};
+  const toggleWish=id=>setWishlist(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id]);
+  const appCtx={user,page,navigate,login,logout,wishlist,toggleWish,lastOrder,setLastOrder};
+  return(
+    <AppCtx.Provider value={appCtx}>
+      <CartCtx.Provider value={{cart,dispatch}}>
+        <div className="app">
+          <NavBar/>
+          {page==="catalog"  &&<CatalogPage/>}
+          {page==="wishlist" &&<WishlistPage/>}
+          {page==="cart"     &&<CartPage/>}
+          {page==="checkout" &&user&&<CheckoutPage/>}
+          {page==="success"  &&<SuccessPage/>}
+          {page==="orders"   &&user&&<OrdersPage/>}
+          {page==="profile"  &&user&&<ProfilePage/>}
+          {page==="admin"    &&user?.role==="admin"&&<AdminDashboard/>}
+          {page==="auth"     &&<AuthPage/>}
+          <footer>
+            <div style={{fontFamily:"var(--serif)",fontSize:"1.2rem",fontWeight:300,letterSpacing:".15em",color:"var(--cream)",marginBottom:".5rem"}}>OAK<span style={{color:"var(--terra)"}}>&amp;</span>EARTH</div>
+            <div style={{fontFamily:"var(--mono)",fontSize:".6rem",letterSpacing:".15em",textTransform:"uppercase"}}>Curated homeware · Free returns · Sustainable sourcing</div>
+          </footer>
+        </div>
+      </CartCtx.Provider>
+    </AppCtx.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
